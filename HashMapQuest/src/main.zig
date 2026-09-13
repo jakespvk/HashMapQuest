@@ -13,4 +13,11 @@ pub fn main(init: std.process.Init) !void {
     defer map.deinit(init.gpa);
 
     try map.add("hi", "hey");
+
+    const keys = try map.keys(init.gpa);
+    defer init.gpa.free(keys);
+
+    for (keys) |key| {
+        std.debug.print("key: {s}\n", .{key});
+    }
 }

@@ -23,12 +23,22 @@ pub const HashMap = struct {
         return key.len;
     }
 
-    pub fn keys(this: *HashMap, allocator: std.mem.Allocator) ![][]const u8 {
-        const output = [this.items.len][]const u8{};
-        for (this.items, 0..) |item, i| {
-            output[i] = item.key;
+    fn dehashKey(hash_key: usize) ![]const u8 {
+        var out_str: []const u8 = "";
+        for (0..hash_key) |_| {
+            out_str = out_str ++ "a";
         }
-        return try allocator.dupe([]const u8, output);
+        return out_str;
+    }
+
+    pub fn keys(this: *HashMap, allocator: std.mem.Allocator) ![][]const u8 {
+        var output: std.ArrayList([]const u8) = .empty;
+        for (this.items, 0..) |_, i| {
+            const dehash_key = try dehashKey(i);
+            try output.append(allocator, dehash_key);
+        }
+
+        return try output.toOwnedSlice(allocator);
     }
 
     pub fn deinit(this: *HashMap, allocator: std.mem.Allocator) void {
